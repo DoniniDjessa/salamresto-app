@@ -5,12 +5,14 @@ import { ScreenHeader } from '../components/ScreenHeader'
 import { Card } from '../components/Card'
 import { Button } from '../components/Button'
 
+// Authentic Salam Resto Menu Data
 const menuItems = [
-  { id: 1, name: 'Salade Chef', price: '5,500 F', category: 'Entrées' },
-  { id: 2, name: 'Burger Premium', price: '8,000 F', category: 'Plats' },
-  { id: 3, name: 'Pâtes Carbonara', price: '7,500 F', category: 'Plats' },
-  { id: 4, name: 'Tiramisu', price: '3,500 F', category: 'Desserts' },
-  { id: 5, name: 'Couscous Merguez', price: '6,500 F', category: 'Plats' },
+  { id: 1, name: 'Thieboudienne Poisson', price: '12,500 F', category: 'Plats Signature' },
+  { id: 2, name: 'Yassa Poulet', price: '9,500 F', category: 'Plats' },
+  { id: 3, name: 'Dibi Agneau (Grillades)', price: '15,000 F', category: 'Grillades' },
+  { id: 4, name: 'Bissap Rouge Maison', price: '2,500 F', category: 'Boissons' },
+  { id: 5, name: 'Pastels Viande (x6)', price: '4,500 F', category: 'Entrées' },
+  { id: 6, name: 'Salade Chef Salam', price: '5,500 F', category: 'Entrées' },
 ]
 
 export default function MenuScreen() {
@@ -25,44 +27,49 @@ export default function MenuScreen() {
         <View style={styles.searchInput}>
           <Search size={18} color={BrandColors.textSecondary} />
           <TextInput
-            placeholder="Rechercher..."
+            placeholder="Rechercher un plat..."
             placeholderTextColor={BrandColors.textSecondary}
             style={styles.input}
           />
         </View>
         <Button
           variant="primary"
-          size="sm"
+          size="md"
           label=""
-          icon={<Plus size={16} color="#FFFFFF" />}
+          icon={<Plus size={20} color="#FFFFFF" />}
+          style={styles.addButton}
           onPress={() => console.log('Add item')}
         />
       </View>
 
       <FlatList
         data={menuItems}
-        scrollEnabled={false}
         contentContainerStyle={styles.listContainer}
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
-          <Card variant="elevated" padding={16}>
+          <Card variant="elevated" padding={16} style={styles.menuCard}>
             <View style={styles.itemHeader}>
+              <View style={styles.iconContainer}>
+                <Utensils size={22} color={BrandColors.primary} />
+              </View>
               <View style={styles.itemInfo}>
                 <Text style={styles.itemName}>{item.name}</Text>
                 <Text style={styles.itemCategory}>{item.category}</Text>
               </View>
               <Text style={styles.itemPrice}>{item.price}</Text>
             </View>
+            
             <View style={styles.itemActions}>
-              <TouchableOpacity style={styles.editButton}>
-                <Text style={styles.editText}>Éditer</Text>
+              <TouchableOpacity style={styles.editButton} activeOpacity={0.7}>
+                <Text style={styles.editText}>Modifier</Text>
               </TouchableOpacity>
-              <TouchableOpacity>
+              <TouchableOpacity style={styles.deleteButton} activeOpacity={0.7}>
                 <Trash2 size={18} color={BrandColors.danger} />
               </TouchableOpacity>
             </View>
           </Card>
         )}
+        ListFooterComponent={<View style={{ height: 100 }} />}
       />
     </View>
   )
@@ -77,7 +84,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     paddingHorizontal: 16,
     paddingVertical: 12,
-    gap: 8,
+    gap: 12,
     alignItems: 'center',
   },
   searchInput: {
@@ -95,19 +102,36 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     color: BrandColors.textPrimary,
-    fontSize: 14,
+    fontSize: 15,
     fontFamily: FONTS.regular,
+  },
+  addButton: {
+    width: 48,
+    height: 48,
+    paddingHorizontal: 0,
+    paddingVertical: 0,
+    borderRadius: RADIUS.lg,
   },
   listContainer: {
     paddingHorizontal: 16,
-    paddingBottom: 100,
-    gap: 12,
+    gap: 16,
+  },
+  menuCard: {
+    marginBottom: 4,
   },
   itemHeader: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 12,
+    gap: 12,
+    marginBottom: 16,
+  },
+  iconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: RADIUS.md,
+    backgroundColor: 'rgba(168, 85, 247, 0.1)',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   itemInfo: {
     flex: 1,
@@ -116,17 +140,19 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: FONTS.bold,
     color: BrandColors.textPrimary,
-    marginBottom: 4,
+    marginBottom: 2,
   },
   itemCategory: {
     fontSize: 12,
-    fontFamily: FONTS.regular,
+    fontFamily: FONTS.medium,
     color: BrandColors.textSecondary,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
   itemPrice: {
-    fontSize: 16,
+    fontSize: 15,
     fontFamily: FONTS.bold,
-    color: BrandColors.primary,
+    color: BrandColors.success,
   },
   itemActions: {
     flexDirection: 'row',
@@ -137,48 +163,19 @@ const styles = StyleSheet.create({
     borderTopColor: BrandColors.borderLight,
   },
   editButton: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
     backgroundColor: 'rgba(168, 85, 247, 0.1)',
     borderRadius: RADIUS.md,
   },
   editText: {
-    fontSize: 12,
+    fontSize: 13,
     fontFamily: FONTS.semiBold,
     color: BrandColors.primary,
   },
+  deleteButton: {
+    padding: 8,
+    backgroundColor: 'rgba(239, 68, 68, 0.05)',
+    borderRadius: RADIUS.md,
+  }
 })
-           </View>
-           <Button bg={BrandColors.primary} br={16} h={50} w={50} p={0}>
-              <Plus size={24} color="white" />
-           </Button>
-        </XStack>
-
-        <YStack gap="$4">
-           {[
-             { name: 'Thieboudienne Poisson', price: '12,500 F', cat: 'Plats' },
-             { name: 'Yassa Poulet', price: '9,500 F', cat: 'Plats' },
-             { name: 'Bissap Rouge', price: '2,500 F', cat: 'Boissons' },
-             { name: 'Dibi Agneau', price: '15,000 F', cat: 'Grillades' }
-           ].map((item, i) => (
-              <Card key={i} p="$4" bg={BrandColors.card} br={24} bw={1} bc="rgba(255,255,255,0.03)">
-                 <XStack gap="$4" ai="center">
-                    <View width={65} height={65} br={18} bg="rgba(255,255,255,0.05)" ai="center" jc="center">
-                       <Utensils size={26} color={BrandColors.primary} />
-                    </View>
-                    <YStack f={1}>
-                       <Text color="white" fow="800" fsz={15}>{item.name}</Text>
-                       <Text color={BrandColors.textSecondary} fsz={11} fow="700" textTransform="uppercase">{item.cat}</Text>
-                       <Text color={BrandColors.success} fow="900" mt="$1">{item.price}</Text>
-                    </YStack>
-                    <Button circular size="$3" bg="rgba(239, 68, 68, 0.1)">
-                       <Trash2 size={16} color={BrandColors.danger} />
-                    </Button>
-                 </XStack>
-              </Card>
-           ))}
-        </YStack>
-      </ScrollView>
-    </View>
-  )
-}

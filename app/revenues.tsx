@@ -1,5 +1,5 @@
-import { ScrollView, View, StyleSheet, Text } from 'react-native'
-import { TrendingUp, BarChart3, ShoppingBag, Truck } from 'lucide-react-native'
+import { ScrollView, View, StyleSheet, Text, FlatList } from 'react-native'
+import { TrendingUp, BarChart3, ShoppingBag, Truck, Filter } from 'lucide-react-native'
 import { BrandColors, FONTS, RADIUS } from '../constants/theme'
 import { ScreenHeader } from '../components/ScreenHeader'
 import { StatCard } from '../components/StatCard'
@@ -11,6 +11,13 @@ const revenueChannels = [
   { icon: BarChart3, label: 'Commande en ligne', value: '225K F', percentage: 30 },
 ]
 
+const recentSales = [
+  { id: '5542', type: 'Salle', amount: '12,500 F', time: '14:32' },
+  { id: '5543', type: 'Web', amount: '18,000 F', time: '15:10' },
+  { id: '5544', type: 'Salle', amount: '25,500 F', time: '15:45' },
+  { id: '5545', type: 'App', amount: '8,000 F', time: '16:05' }
+]
+
 export default function RevenuesScreen() {
   return (
     <View style={styles.container}>
@@ -19,7 +26,7 @@ export default function RevenuesScreen() {
         subtitle="Détail des revenus par canal"
       />
 
-      <ScrollView showsVerticalScrollIndicator={false} style={styles.scrollView}>
+      <ScrollView showsVerticalScrollIndicator={false} style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
         <View style={styles.statsGrid}>
           <StatCard
             icon={<TrendingUp size={24} color={BrandColors.primary} />}
@@ -51,13 +58,37 @@ export default function RevenuesScreen() {
                     <View
                       style={[
                         styles.progressFill,
-                        { width: `${channel.percentage * 2}%` },
+                        { width: `${channel.percentage}%` },
                       ]}
                     />
                   </View>
                 </Card>
               )
             })}
+          </View>
+        </View>
+
+        {/* Recent Sales Journal */}
+        <View style={styles.sectionContainer}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Journal des Ventes</Text>
+            <Filter size={18} color={BrandColors.textSecondary} />
+          </View>
+          <View style={styles.salesList}>
+            {recentSales.map((sale, i) => (
+              <Card key={i} variant="default" padding={12} style={styles.saleCard}>
+                <View style={styles.saleContent}>
+                  <View style={styles.saleIconContainer}>
+                    <BarChart3 size={18} color={BrandColors.success} />
+                  </View>
+                  <View style={styles.saleInfo}>
+                    <Text style={styles.saleTitle}>Commande #{sale.id}</Text>
+                    <Text style={styles.saleSub}>{sale.type} • {sale.time}</Text>
+                  </View>
+                  <Text style={styles.saleAmount}>{sale.amount}</Text>
+                </View>
+              </Card>
+            ))}
           </View>
         </View>
 
@@ -70,7 +101,7 @@ export default function RevenuesScreen() {
                 <View key={i} style={styles.hourlyItem}>
                   <Text style={styles.hourlyTime}>{time}</Text>
                   <View style={styles.hourlyBar}>
-                    <View style={[styles.hourlyFill, { width: `${(i + 1) * 13}%` }]} />
+                    <View style={[styles.hourlyFill, { width: `${(i + 1) * 15}%` }]} />
                   </View>
                   <Text style={styles.hourlyAmount}>{50 + i * 20}K F</Text>
                 </View>
@@ -91,6 +122,9 @@ const styles = StyleSheet.create({
   scrollView: {
     flex: 1,
   },
+  scrollContent: {
+    paddingBottom: 40,
+  },
   statsGrid: {
     paddingHorizontal: 16,
     marginBottom: 24,
@@ -100,15 +134,19 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     marginBottom: 24,
   },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
   sectionTitle: {
     fontSize: 18,
     fontFamily: FONTS.bold,
     color: BrandColors.textPrimary,
-    marginBottom: 12,
   },
   channelList: {
     gap: 12,
-    paddingBottom: 100,
   },
   channelHeader: {
     flexDirection: 'row',
@@ -154,6 +192,43 @@ const styles = StyleSheet.create({
     backgroundColor: BrandColors.primary,
     borderRadius: RADIUS.full,
   },
+  salesList: {
+    gap: 10,
+  },
+  saleCard: {
+    borderColor: 'rgba(255, 255, 255, 0.03)',
+  },
+  saleContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  saleIconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: RADIUS.md,
+    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  saleInfo: {
+    flex: 1,
+  },
+  saleTitle: {
+    fontSize: 14,
+    fontFamily: FONTS.bold,
+    color: BrandColors.textPrimary,
+  },
+  saleSub: {
+    fontSize: 11,
+    fontFamily: FONTS.regular,
+    color: BrandColors.textSecondary,
+  },
+  saleAmount: {
+    fontSize: 14,
+    fontFamily: FONTS.bold,
+    color: BrandColors.textPrimary,
+  },
   hourlyList: {
     gap: 12,
   },
@@ -182,39 +257,3 @@ const styles = StyleSheet.create({
     color: BrandColors.textPrimary,
   },
 })
-           <Card f={1} p="$5" bg={BrandColors.primary} br={24} elevate shadowColor={BrandColors.primary} shadowOpacity={0.2}>
-              <Text color="rgba(255,255,255,0.8)" fow="800" fsz={10} mb="$1" ls={1}>LIVRAISON</Text>
-              <Text color="white" fsz={22} fow="900">130K F</Text>
-           </Card>
-        </XStack>
-
-        <YStack gap="$5">
-           <XStack jc="space-between" ai="center">
-              <Text color="white" fsz={18} fow="900">Journal des Ventes</Text>
-              <Button circular size="$3" bg={BrandColors.card} icon={Filter} />
-           </XStack>
-
-           {[
-             { id: '5542', type: 'Salle', amount: '12,500 F', time: '14:32' },
-             { id: '5543', type: 'Web', amount: '18,000 F', time: '15:10' },
-             { id: '5544', type: 'Salle', amount: '25,500 F', time: '15:45' },
-             { id: '5545', type: 'App', amount: '8,000 F', time: '16:05' }
-           ].map((sale, i) => (
-              <XStack key={i} jc="space-between" ai="center" p="$4" bg={BrandColors.card} br={22} bw={1} bc="rgba(255,255,255,0.03)">
-                 <XStack gap="$3" ai="center">
-                    <View bg="rgba(16, 185, 129, 0.1)" p="$3" br={14}>
-                       <BarChart3 size={20} color={BrandColors.success} />
-                    </View>
-                    <YStack>
-                       <Text color="white" fow="800" fsz={15}>Commande #{sale.id}</Text>
-                       <Text color={BrandColors.textSecondary} fsz={11}>{sale.type} • {sale.time}</Text>
-                    </YStack>
-                 </XStack>
-                 <Text color="white" fow="900" fsz={15}>{sale.amount}</Text>
-              </XStack>
-           ))}
-        </YStack>
-      </ScrollView>
-    </View>
-  )
-}
