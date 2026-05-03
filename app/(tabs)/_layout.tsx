@@ -9,7 +9,7 @@ const TAB_META: Record<string, { icon: any; label: string }> = {
   index: { icon: LayoutDashboard, label: 'Accueil' },
   orders: { icon: Utensils, label: 'Commandes' },
   kitchen: { icon: ChefHat, label: 'Cuisine' },
-  delivery: { icon: Truck, label: 'Livraison' },
+  delivery: { icon: Truck, label: 'Livraisons' },
 }
 
 function CustomTabBar({ state, descriptors, navigation }: any) {
@@ -106,7 +106,7 @@ export default function TabLayout() {
       <Tabs.Screen 
         name="delivery"
         options={{
-          title: 'Livraison',
+          title: 'Livraisons',
         }}
       />
     </Tabs>

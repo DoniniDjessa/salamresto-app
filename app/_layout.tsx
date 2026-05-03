@@ -19,7 +19,10 @@ import {
   TrendingUp, 
   PieChart,
   LogOut,
-  User 
+  User,
+  Settings,
+  Monitor,
+  Truck
 } from 'lucide-react-native'
 import { BrandColors, FONTS, RADIUS } from '../constants/theme'
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native'
@@ -90,7 +93,7 @@ export default function RootLayout() {
           drawerContent={(props) => <CustomDrawerContent {...props} />}
           screenOptions={{
             headerShown: false,
-            drawerType: 'slide',
+            drawerType: 'front',
             defaultStatus: 'closed',
             drawerActiveTintColor: BrandColors.primary,
             drawerInactiveTintColor: BrandColors.textSecondary,
@@ -120,16 +123,37 @@ export default function RootLayout() {
             }} 
           />
           <Drawer.Screen 
+            name="enregistrements" 
+            options={{ 
+              drawerLabel: 'Enregistrements',
+              drawerIcon: ({ color }) => <Monitor size={20} color={color} />,
+            }} 
+          />
+          <Drawer.Screen 
+            name="kitchen" 
+            options={{ 
+              drawerLabel: 'Écran Cuisine',
+              drawerIcon: ({ color }) => <Utensils size={20} color={color} />,
+            }} 
+          />
+          <Drawer.Screen 
+            name="tables" 
+            options={{ 
+              drawerLabel: 'Gestion Tables',
+              drawerIcon: ({ color }) => <LayoutDashboard size={20} color={color} />,
+            }} 
+          />
+          <Drawer.Screen 
             name="menu" 
             options={{ 
-              drawerLabel: 'Gestion Menu',
+              drawerLabel: 'Menu',
               drawerIcon: ({ color }) => <Utensils size={20} color={color} />,
             }} 
           />
           <Drawer.Screen 
             name="profiles" 
             options={{ 
-              drawerLabel: 'Profils Équipe',
+              drawerLabel: 'Équipe',
               drawerIcon: ({ color }) => <Users size={20} color={color} />,
             }} 
           />
@@ -159,6 +183,13 @@ export default function RootLayout() {
             options={{ 
               drawerLabel: 'Analyses',
               drawerIcon: ({ color }) => <PieChart size={20} color={color} />,
+            }} 
+          />
+          <Drawer.Screen 
+            name="settings" 
+            options={{ 
+              drawerLabel: 'Paramètres',
+              drawerIcon: ({ color }) => <Settings size={20} color={color} />,
             }} 
           />
         </Drawer>

@@ -1,26 +1,19 @@
 import { useState, useEffect } from 'react'
-import { ScrollView, View, StyleSheet, Text, TouchableOpacity, ActivityIndicator, Alert, FlatList, TextInput, Modal } from 'react-native'
-import { Truck, MapPin, User, CheckCircle, Package, ArrowRight, Clock, Phone, Plus, X } from 'lucide-react-native'
-import { BrandColors, FONTS, RADIUS } from '../../constants/theme'
-import { ScreenHeader } from '../../components/ScreenHeader'
-import { Card } from '../../components/Card'
-import { Button } from '../../components/Button'
-import { supabase } from '../../lib/supabase'
+import { ScrollView, View, StyleSheet, Text, TouchableOpacity, ActivityIndicator, Alert, FlatList } from 'react-native'
+import { Truck, MapPin, User, CheckCircle, Package, ArrowRight, Clock, Phone, Plus } from 'lucide-react-native'
+import { BrandColors, FONTS, RADIUS } from '../constants/theme'
+import { ScreenHeader } from '../components/ScreenHeader'
+import { Card } from '../components/Card'
+import { Button } from '../components/Button'
+import { supabase } from '../lib/supabase'
 
-export default function LivraisonsScreen() {
+export default function LivraisonScreen() {
   const [orders, setOrders] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
-  const [showAddForm, setShowAddForm] = useState(false)
-  const [newOrder, setNewOrder] = useState({
-    customername: '',
-    deliveryaddress: '',
-    total: '',
-    payment_method: 'cash'
-  })
 
   useEffect(() => {
     fetchOrders()
-    const channel = supabase.channel('livraisons-tab-updates')
+    const channel = supabase.channel('livraison-updates')
       .on('postgres_changes', { event: '*', table: 'resto-orders', schema: 'public' }, () => {
         fetchOrders()
       })
@@ -36,7 +29,7 @@ export default function LivraisonsScreen() {
       .from('resto-orders')
       .select('*')
       .eq('type', 'external')
-      .in('status', ['en_attente', 'en_preparation', 'pret', 'en_livraison', 'livre'])
+      .in('status', ['pret', 'en_livraison', 'livre'])
       .order('updated_at', { ascending: false })
     
     if (data) setOrders(data)
@@ -53,34 +46,8 @@ export default function LivraisonsScreen() {
     else Alert.alert("Erreur", error.message)
   }
 
-  const handleCreateOrder = async () => {
-    if (!newOrder.customername || !newOrder.deliveryaddress || !newOrder.total) {
-      return Alert.alert("Erreur", "Veuillez remplir tous les champs")
-    }
-
-    const { error } = await supabase.from('resto-orders').insert([{
-      type: 'external',
-      customername: newOrder.customername,
-      deliveryaddress: newOrder.deliveryaddress,
-      total: parseFloat(newOrder.total),
-      payment_method: newOrder.payment_method,
-      status: 'en_attente',
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-      items: []
-    }])
-
-    if (!error) {
-      setShowAddForm(false)
-      setNewOrder({ customername: '', deliveryaddress: '', total: '', payment_method: 'cash' })
-      fetchOrders()
-    } else {
-      Alert.alert("Erreur", error.message)
-    }
-  }
-
   const DeliveryCard = ({ order }: { order: any }) => (
-    <Card variant="elevated" padding={16} style={[styles.deliveryCard, { borderLeftWidth: 4, borderLeftColor: order.status === 'pret' || order.status === 'en_attente' ? BrandColors.primary : order.status === 'en_livraison' ? BrandColors.warning : BrandColors.success }]}>
+    <Card variant="elevated" padding={16} style={[styles.deliveryCard, { borderLeftWidth: 4, borderLeftColor: order.status === 'pret' ? BrandColors.primary : order.status === 'en_livraison' ? BrandColors.warning : BrandColors.success }]}>
       <View style={styles.cardHeader}>
         <Text style={styles.orderId}>#{order.id.slice(0, 4).toUpperCase()}</Text>
         <View style={[styles.paymentBadge, { backgroundColor: order.payment_method === 'online' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(245, 158, 11, 0.1)' }]}>
@@ -101,7 +68,7 @@ export default function LivraisonsScreen() {
 
       <View style={styles.cardFooter}>
         <Text style={styles.totalAmount}>{order.total?.toLocaleString()} F</Text>
-        {(order.status === 'pret' || order.status === 'en_attente') && (
+        {order.status === 'pret' && (
           <TouchableOpacity style={styles.actionBtn} onPress={() => updateStatus(order.id, 'en_livraison')}>
             <Text style={styles.actionBtnText}>DÉMARRER</Text>
             <ArrowRight size={16} color="white" />
@@ -126,10 +93,10 @@ export default function LivraisonsScreen() {
   return (
     <View style={styles.container}>
       <ScreenHeader
-        title="Livraisons"
+        title="Livraison"
         subtitle="Logistique & Expéditions"
         action={
-          <TouchableOpacity style={styles.headerAction} onPress={() => setShowAddForm(true)}>
+          <TouchableOpacity style={styles.headerAction} onPress={() => Alert.alert("Nouveau", "Créer une livraison manuelle")}>
             <Plus size={20} color="white" />
           </TouchableOpacity>
         }
@@ -137,8 +104,8 @@ export default function LivraisonsScreen() {
 
       <View style={styles.statsRow}>
         <View style={styles.statBox}>
-          <Text style={styles.statVal}>{orders.filter(o => o.status === 'pret' || o.status === 'en_attente').length}</Text>
-          <Text style={styles.statLabel}>ATTENTE</Text>
+          <Text style={styles.statVal}>{orders.filter(o => o.status === 'pret').length}</Text>
+          <Text style={styles.statLabel}>À PRÉPARER</Text>
         </View>
         <View style={styles.statBox}>
           <Text style={[styles.statVal, { color: BrandColors.warning }]}>{orders.filter(o => o.status === 'en_livraison').length}</Text>
@@ -146,7 +113,7 @@ export default function LivraisonsScreen() {
         </View>
         <View style={styles.statBox}>
           <Text style={[styles.statVal, { color: BrandColors.success }]}>{orders.filter(o => o.status === 'livre').length}</Text>
-          <Text style={styles.statLabel}>LIVRÉS</Text>
+          <Text style={styles.statLabel}>LIVRÉS (H24)</Text>
         </View>
       </View>
 
@@ -168,72 +135,6 @@ export default function LivraisonsScreen() {
           }
         />
       )}
-
-      {/* Manual Delivery Modal */}
-      <Modal visible={showAddForm} animationType="slide" transparent>
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Nouvelle Livraison</Text>
-              <TouchableOpacity onPress={() => setShowAddForm(false)}>
-                <X size={24} color={BrandColors.textPrimary} />
-              </TouchableOpacity>
-            </View>
-            
-            <ScrollView style={styles.form}>
-              <Text style={styles.label}>NOM DU CLIENT</Text>
-              <TextInput 
-                style={styles.input} 
-                value={newOrder.customername} 
-                onChangeText={t => setNewOrder({...newOrder, customername: t})}
-                placeholder="Ex: M. Diallo"
-                placeholderTextColor={BrandColors.textMuted}
-              />
-
-              <Text style={styles.label}>ADRESSE</Text>
-              <TextInput 
-                style={styles.input} 
-                value={newOrder.deliveryaddress} 
-                onChangeText={t => setNewOrder({...newOrder, deliveryaddress: t})}
-                placeholder="Ex: Plateau, Rue 12"
-                placeholderTextColor={BrandColors.textMuted}
-              />
-
-              <Text style={styles.label}>MONTANT TOTAL (F)</Text>
-              <TextInput 
-                style={styles.input} 
-                keyboardType="numeric"
-                value={newOrder.total} 
-                onChangeText={t => setNewOrder({...newOrder, total: t})}
-                placeholder="0"
-                placeholderTextColor={BrandColors.textMuted}
-              />
-
-              <View style={styles.paymentToggle}>
-                <TouchableOpacity 
-                  style={[styles.paymentBtn, newOrder.payment_method === 'cash' && styles.paymentBtnActive]}
-                  onPress={() => setNewOrder({...newOrder, payment_method: 'cash'})}
-                >
-                  <Text style={[styles.paymentBtnText, newOrder.payment_method === 'cash' && styles.paymentBtnTextActive]}>Espèces</Text>
-                </TouchableOpacity>
-                <TouchableOpacity 
-                  style={[styles.paymentBtn, newOrder.payment_method === 'online' && styles.paymentBtnActive]}
-                  onPress={() => setNewOrder({...newOrder, payment_method: 'online'})}
-                >
-                  <Text style={[styles.paymentBtnText, newOrder.payment_method === 'online' && styles.paymentBtnTextActive]}>Payé</Text>
-                </TouchableOpacity>
-              </View>
-
-              <Button 
-                variant="primary" 
-                label="ENREGISTRER" 
-                onPress={handleCreateOrder}
-                style={{ marginTop: 20 }}
-              />
-            </ScrollView>
-          </View>
-        </View>
-      </Modal>
     </View>
   )
 }
@@ -266,7 +167,7 @@ const styles = StyleSheet.create({
   },
   statVal: { fontSize: 20, fontFamily: FONTS.bold, color: BrandColors.textPrimary },
   statLabel: { fontSize: 9, fontFamily: FONTS.bold, color: BrandColors.textMuted, marginTop: 2 },
-  list: { paddingHorizontal: 16, paddingBottom: 100 },
+  list: { paddingHorizontal: 16, paddingBottom: 40 },
   deliveryCard: { marginBottom: 16 },
   cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
   orderId: { fontSize: 16, fontFamily: FONTS.bold, color: BrandColors.textPrimary },
@@ -282,16 +183,4 @@ const styles = StyleSheet.create({
   completedText: { color: BrandColors.success, fontSize: 12, fontFamily: FONTS.bold },
   empty: { paddingVertical: 80, alignItems: 'center', gap: 16 },
   emptyText: { color: BrandColors.textMuted, fontFamily: FONTS.medium },
-  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.8)', justifyContent: 'flex-end' },
-  modalContent: { backgroundColor: BrandColors.card, borderTopLeftRadius: RADIUS.xl, borderTopRightRadius: RADIUS.xl, padding: 24, height: '80%' },
-  modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 },
-  modalTitle: { fontSize: 20, fontFamily: FONTS.bold, color: BrandColors.textPrimary },
-  form: { flex: 1 },
-  label: { fontSize: 11, fontFamily: FONTS.bold, color: BrandColors.textMuted, marginBottom: 8 },
-  input: { backgroundColor: BrandColors.bg, borderRadius: RADIUS.md, padding: 16, color: BrandColors.textPrimary, fontFamily: FONTS.medium, marginBottom: 20 },
-  paymentToggle: { flexDirection: 'row', gap: 12, marginBottom: 20 },
-  paymentBtn: { flex: 1, paddingVertical: 14, borderRadius: RADIUS.md, backgroundColor: BrandColors.bg, alignItems: 'center', borderWidth: 1, borderColor: BrandColors.borderLight },
-  paymentBtnActive: { backgroundColor: BrandColors.primary, borderColor: BrandColors.primary },
-  paymentBtnText: { fontSize: 14, fontFamily: FONTS.bold, color: BrandColors.textSecondary },
-  paymentBtnTextActive: { color: 'white' },
 })
