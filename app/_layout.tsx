@@ -22,7 +22,9 @@ import {
   User,
   Settings,
   Monitor,
-  Truck
+  Truck,
+  ChefHat,
+  LayoutGrid
 } from 'lucide-react-native'
 import { BrandColors, FONTS, RADIUS } from '../constants/theme'
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native'
@@ -105,12 +107,12 @@ export default function RootLayout() {
             drawerLabelStyle: {
               fontFamily: FONTS.semiBold,
               fontSize: 14,
-              marginLeft: -10,
+              marginLeft: 8, // Fixed icon-to-text distance
             },
             drawerItemStyle: {
               borderRadius: RADIUS.lg,
               marginHorizontal: 12,
-              paddingHorizontal: 8,
+              paddingHorizontal: 4,
             },
             sceneContainerStyle: { backgroundColor: BrandColors.bg },
           }}
@@ -130,17 +132,10 @@ export default function RootLayout() {
             }} 
           />
           <Drawer.Screen 
-            name="kitchen" 
-            options={{ 
-              drawerLabel: 'Écran Cuisine',
-              drawerIcon: ({ color }) => <Utensils size={20} color={color} />,
-            }} 
-          />
-          <Drawer.Screen 
             name="tables" 
             options={{ 
               drawerLabel: 'Gestion Tables',
-              drawerIcon: ({ color }) => <LayoutDashboard size={20} color={color} />,
+              drawerIcon: ({ color }) => <LayoutGrid size={20} color={color} />,
             }} 
           />
           <Drawer.Screen 
@@ -151,38 +146,17 @@ export default function RootLayout() {
             }} 
           />
           <Drawer.Screen 
-            name="profiles" 
+            name="gestion" 
             options={{ 
-              drawerLabel: 'Équipe',
-              drawerIcon: ({ color }) => <Users size={20} color={color} />,
+              drawerLabel: 'Gestion',
+              drawerIcon: ({ color }) => <Settings size={20} color={color} />,
             }} 
           />
           <Drawer.Screen 
-            name="accounting" 
+            name="(finance)" 
             options={{ 
-              drawerLabel: 'Comptabilité',
+              drawerLabel: 'Finances',
               drawerIcon: ({ color }) => <Wallet size={20} color={color} />,
-            }} 
-          />
-          <Drawer.Screen 
-            name="expenses" 
-            options={{ 
-              drawerLabel: 'Dépenses',
-              drawerIcon: ({ color }) => <CreditCard size={20} color={color} />,
-            }} 
-          />
-          <Drawer.Screen 
-            name="revenues" 
-            options={{ 
-              drawerLabel: 'Revenus',
-              drawerIcon: ({ color }) => <TrendingUp size={20} color={color} />,
-            }} 
-          />
-          <Drawer.Screen 
-            name="analytics" 
-            options={{ 
-              drawerLabel: 'Analyses',
-              drawerIcon: ({ color }) => <PieChart size={20} color={color} />,
             }} 
           />
           <Drawer.Screen 
@@ -192,6 +166,13 @@ export default function RootLayout() {
               drawerIcon: ({ color }) => <Settings size={20} color={color} />,
             }} 
           />
+          {/* Hide internal screens from drawer but keep them in layout */}
+          <Drawer.Screen name="profiles" options={{ drawerItemStyle: { display: 'none' } }} />
+          <Drawer.Screen name="equipe" options={{ drawerItemStyle: { display: 'none' } }} />
+          <Drawer.Screen name="accounting" options={{ drawerItemStyle: { display: 'none' } }} />
+          <Drawer.Screen name="analytics" options={{ drawerItemStyle: { display: 'none' } }} />
+          <Drawer.Screen name="kitchen" options={{ drawerItemStyle: { display: 'none' } }} />
+          <Drawer.Screen name="livraison" options={{ drawerItemStyle: { display: 'none' } }} />
         </Drawer>
       </Provider>
     </GestureHandlerRootView>
@@ -210,11 +191,11 @@ const styles = StyleSheet.create({
     width: 60,
     height: 60,
     borderRadius: 30,
-    backgroundColor: 'rgba(168, 85, 247, 0.1)',
+    backgroundColor: 'rgba(99, 102, 241, 0.1)',
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: 'rgba(168, 85, 247, 0.2)',
+    borderColor: 'rgba(99, 102, 241, 0.2)',
   },
   userName: {
     color: BrandColors.textPrimary,
@@ -230,14 +211,14 @@ const styles = StyleSheet.create({
   },
   divider: {
     height: 1,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    backgroundColor: 'rgba(0, 0, 0, 0.05)',
     marginHorizontal: 12,
     marginBottom: 20,
   },
   footer: {
     padding: 20,
     borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.05)',
+    borderTopColor: 'rgba(0, 0, 0, 0.05)',
   },
   logoutBtn: {
     flexDirection: 'row',

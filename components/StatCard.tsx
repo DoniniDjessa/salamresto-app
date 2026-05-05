@@ -23,7 +23,7 @@ export function StatCard({
   color = BrandColors.primary,
 }: StatCardProps) {
   return (
-    <Card variant="elevated" padding={16}>
+    <Card variant="elevated" padding={16} style={{ flex: 1, minHeight: 110 }}>
       <View style={styles.container}>
         {icon && (
           <View style={[styles.iconContainer, { backgroundColor: `${color}20` }]}>
@@ -81,7 +81,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   value: {
-    fontSize: 24,
+    fontSize: 18,
     fontFamily: FONTS.bold,
     color: BrandColors.textPrimary,
   },

@@ -2,22 +2,22 @@ import { useColorScheme } from 'react-native';
 
 // Salamresto Brand Colors - Violet & Dark
 export const BrandColors = {
-  primary: '#A855F7',        // Salamresto Violet (primary)
-  secondary: '#9333EA',      // Deep Violet
-  accent: '#C084FC',         // Light Violet
-  dark: '#12121A',           // Salamresto Dark (almost black)
-  bg: '#12121A',             // Main Background
-  bgSecondary: '#1A1A24',    // Secondary Background
-  card: '#1E1E2A',           // Card Surface - slightly lighter
-  border: 'rgba(168, 85, 247, 0.1)',  // Violet-tinted border
-  borderLight: 'rgba(255, 255, 255, 0.05)', // Light border
-  textPrimary: '#FFFFFF',
-  textSecondary: '#A0A0A8',
-  textMuted: '#6B6B73',
+  primary: '#6366F1',        // Vibrant Indigo
+  secondary: '#F43F5E',      // Rose / Pink
+  accent: '#10B981',         // Emerald Green
+  dark: '#0F172A',           // Slate Dark
+  bg: '#FFFFFF',             // White Background
+  bgSecondary: '#F8FAFC',    // Slate 50
+  card: '#FFFFFF',           // White Card
+  border: 'rgba(99, 102, 241, 0.1)',  // Indigo-tinted border
+  borderLight: 'rgba(0, 0, 0, 0.05)',
+  textPrimary: '#1E293B',    // Slate 800
+  textSecondary: '#64748B',  // Slate 500
+  textMuted: '#94A3B8',      // Slate 400
   success: '#10B981',
   danger: '#EF4444',
   warning: '#F59E0B',
-  glow: 'rgba(168, 85, 247, 0.15)',  // Violet glow for active states
+  glow: 'rgba(99, 102, 241, 0.12)',
 };
 
 // Palette for light/dark mode support (if needed in future)

@@ -1,7 +1,7 @@
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native'
 import { BrandColors, FONTS } from '../constants/theme'
-import { Menu } from 'lucide-react-native'
-import { useNavigation } from 'expo-router'
+import { Menu, ChevronLeft } from 'lucide-react-native'
+import { useNavigation, useRouter } from 'expo-router'
 import { DrawerNavigationProp } from '@react-navigation/drawer'
 
 interface ScreenHeaderProps {
@@ -9,22 +9,32 @@ interface ScreenHeaderProps {
   subtitle?: string
   action?: React.ReactNode
   showMenu?: boolean
+  showBack?: boolean
 }
 
-export function ScreenHeader({ title, subtitle, action, showMenu = true }: ScreenHeaderProps) {
+export function ScreenHeader({ title, subtitle, action, showMenu = true, showBack = true }: ScreenHeaderProps) {
   const navigation = useNavigation<DrawerNavigationProp<any>>()
+  const router = useRouter()
+  const canGoBack = navigation.canGoBack()
 
   return (
     <View style={styles.container}>
       <View style={styles.leftSection}>
-        {showMenu && (
+        {showBack && canGoBack ? (
+          <TouchableOpacity 
+            onPress={() => router.back()}
+            style={styles.menuButton}
+          >
+            <ChevronLeft color={BrandColors.textPrimary} size={24} />
+          </TouchableOpacity>
+        ) : showMenu ? (
           <TouchableOpacity 
             onPress={() => navigation.openDrawer()}
             style={styles.menuButton}
           >
             <Menu color={BrandColors.textPrimary} size={24} />
           </TouchableOpacity>
-        )}
+        ) : null}
         <View style={styles.textContainer}>
           <Text style={styles.title}>{title}</Text>
           {subtitle && <Text style={styles.subtitle}>{subtitle}</Text>}
@@ -55,7 +65,7 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 12,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    backgroundColor: 'rgba(99, 102, 241, 0.08)',
     justifyContent: 'center',
     alignItems: 'center',
   },

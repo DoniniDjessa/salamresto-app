@@ -167,10 +167,19 @@ export default function MenuScreen() {
     ])
   }
 
-  const filteredProducts = products.filter(p => 
-    p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    (p.category && p.category.toLowerCase().includes(searchQuery.toLowerCase()))
-  )
+  const [selectedCategory, setSelectedCategory] = useState<string>('TOUS')
+
+  const categories = ['TOUS', 'PLAT PRINCIPAL', 'BOISSONS', 'DESSERT', 'COLLATION', 'AUTRES']
+
+  const filteredProducts = products.filter(p => {
+    const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         (p.category && p.category.toLowerCase().includes(searchQuery.toLowerCase()))
+    
+    if (selectedCategory === 'TOUS') return matchesSearch
+    
+    const productCat = p.category?.toUpperCase() || 'AUTRES'
+    return matchesSearch && productCat === selectedCategory
+  })
 
   return (
     <View style={styles.container}>
@@ -193,6 +202,27 @@ export default function MenuScreen() {
         <TouchableOpacity style={styles.addButton} onPress={() => handleOpenModal()}>
           <Plus size={24} color="white" />
         </TouchableOpacity>
+      </View>
+
+      {/* Category Tabs */}
+      <View style={styles.tabsWrapper}>
+        <ScrollView 
+          horizontal 
+          showsHorizontalScrollIndicator={false} 
+          contentContainerStyle={styles.tabsScroll}
+        >
+          {categories.map((cat) => (
+            <TouchableOpacity
+              key={cat}
+              style={[styles.categoryTab, selectedCategory === cat && styles.activeCategoryTab]}
+              onPress={() => setSelectedCategory(cat)}
+            >
+              <Text style={[styles.categoryTabText, selectedCategory === cat && styles.activeCategoryTabText]}>
+                {cat}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
       </View>
 
       {loading ? (
@@ -237,9 +267,10 @@ export default function MenuScreen() {
               <Text style={styles.emptyText}>Aucun plat trouvé</Text>
             </View>
           }
-          ListFooterComponent={<View style={{ height: 100 }} />}
+          ListFooterComponent={<View style={{ height: 120 }} />}
         />
       )}
+
 
       {/* Add/Edit Modal */}
       <Modal visible={showModal} animationType="slide" transparent>
@@ -287,13 +318,19 @@ export default function MenuScreen() {
               />
 
               <Text style={styles.label}>CATÉGORIE</Text>
-              <TextInput 
-                style={styles.formInput} 
-                value={form.category} 
-                onChangeText={t => setForm({...form, category: t})}
-                placeholder="Ex: Plats de Résistance"
-                placeholderTextColor={BrandColors.textMuted}
-              />
+              <View style={styles.formCategories}>
+                {['PLAT PRINCIPAL', 'BOISSONS', 'DESSERT', 'COLLATION', 'AUTRES'].map((cat) => (
+                  <TouchableOpacity
+                    key={cat}
+                    style={[styles.formCatBtn, form.category?.toUpperCase() === cat && styles.formCatBtnActive]}
+                    onPress={() => setForm({...form, category: cat})}
+                  >
+                    <Text style={[styles.formCatBtnText, form.category?.toUpperCase() === cat && styles.formCatBtnTextActive]}>
+                      {cat}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
 
               <Button 
                 variant="primary" 
@@ -326,6 +363,30 @@ const styles = StyleSheet.create({
   input: { flex: 1, color: BrandColors.textPrimary, fontSize: 15, fontFamily: FONTS.regular },
   addButton: { width: 48, height: 48, borderRadius: RADIUS.lg, backgroundColor: BrandColors.primary, justifyContent: 'center', alignItems: 'center' },
   listContainer: { paddingHorizontal: 16, gap: 16 },
+  tabsWrapper: { marginBottom: 16 },
+  tabsScroll: { paddingHorizontal: 16, gap: 10 },
+  categoryTab: {
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: RADIUS.lg,
+    backgroundColor: BrandColors.card,
+    borderWidth: 1,
+    borderColor: BrandColors.borderLight,
+  },
+  activeCategoryTab: {
+    backgroundColor: BrandColors.primary,
+    borderColor: BrandColors.primary,
+  },
+  categoryTabText: {
+    fontSize: 12,
+    fontFamily: FONTS.semiBold,
+    color: BrandColors.textSecondary,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  activeCategoryTabText: {
+    color: 'white',
+  },
   menuCard: { marginBottom: 4 },
   itemHeader: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 16 },
   iconContainer: { width: 54, height: 54, borderRadius: RADIUS.md, backgroundColor: 'rgba(168, 85, 247, 0.1)', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' },
@@ -345,11 +406,16 @@ const styles = StyleSheet.create({
   modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 },
   modalTitle: { fontSize: 20, fontFamily: FONTS.bold, color: BrandColors.textPrimary },
   form: { flex: 1 },
-  imagePicker: { width: '100%', height: 160, backgroundColor: BrandColors.bg, borderRadius: RADIUS.lg, justifyContent: 'center', alignItems: 'center', marginBottom: 24, overflow: 'hidden' },
+  imagePicker: { width: '100%', height: 160, backgroundColor: BrandColors.bg, borderRadius: RADIUS.lg, justifyContent: 'center', alignItems: 'center', marginBottom: 24, overflow: 'hidden', borderWidth: 1, borderColor: BrandColors.borderLight },
   pickedImage: { width: '100%', height: '100%' },
   imagePlaceholder: { alignItems: 'center', gap: 8 },
   imagePlaceholderText: { fontSize: 12, fontFamily: FONTS.medium, color: BrandColors.textMuted },
   editImageBtn: { position: 'absolute', bottom: 12, right: 12, width: 32, height: 32, borderRadius: 10, backgroundColor: BrandColors.primary, justifyContent: 'center', alignItems: 'center' },
   label: { fontSize: 11, fontFamily: FONTS.bold, color: BrandColors.textMuted, marginBottom: 8 },
-  formInput: { backgroundColor: BrandColors.bg, borderRadius: RADIUS.md, padding: 16, color: BrandColors.textPrimary, fontFamily: FONTS.medium, marginBottom: 20 }
+  formInput: { backgroundColor: BrandColors.bg, borderRadius: RADIUS.md, padding: 16, color: BrandColors.textPrimary, fontFamily: FONTS.medium, marginBottom: 20, borderWidth: 1, borderColor: BrandColors.borderLight },
+  formCategories: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 24 },
+  formCatBtn: { paddingHorizontal: 12, paddingVertical: 8, borderRadius: RADIUS.md, backgroundColor: BrandColors.bg, borderWidth: 1, borderColor: BrandColors.borderLight },
+  formCatBtnActive: { backgroundColor: BrandColors.primary, borderColor: BrandColors.primary },
+  formCatBtnText: { fontSize: 11, fontFamily: FONTS.bold, color: BrandColors.textSecondary, textTransform: 'uppercase' },
+  formCatBtnTextActive: { color: 'white' },
 })

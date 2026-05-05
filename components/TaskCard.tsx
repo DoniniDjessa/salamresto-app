@@ -5,9 +5,8 @@ import { Clock, AlertCircle } from 'lucide-react-native'
 
 interface TaskCardProps {
   title: string
-  description?: string
-  tableId?: string
-  status: 'pending' | 'urgent' | 'completed'
+  subtitle?: string
+  status: 'todo' | 'in_progress' | 'done' | 'urgent' | 'pending' | 'completed'
   time?: string
   onPress?: () => void
   action?: React.ReactNode
@@ -15,36 +14,38 @@ interface TaskCardProps {
 
 export function TaskCard({
   title,
-  description,
-  tableId,
+  subtitle,
   status,
   time,
   onPress,
   action,
 }: TaskCardProps) {
-  const statusColor =
-    status === 'urgent'
-      ? BrandColors.danger
-      : status === 'pending'
-        ? BrandColors.warning
-        : BrandColors.success
+  const getStatusInfo = () => {
+    switch(status) {
+      case 'urgent': return { color: BrandColors.danger, label: 'Urgent' }
+      case 'todo': 
+      case 'pending': return { color: BrandColors.warning, label: 'En attente' }
+      case 'in_progress': return { color: BrandColors.primary, label: 'En cours' }
+      case 'done':
+      case 'completed': return { color: BrandColors.success, label: 'Terminé' }
+      default: return { color: BrandColors.textSecondary, label: status }
+    }
+  }
+
+  const { color, label } = getStatusInfo()
 
   return (
     <TouchableOpacity onPress={onPress} activeOpacity={0.7}>
-      <Card variant="elevated" padding={16}>
+      <Card variant="default" padding={16} style={styles.card}>
         <View style={styles.header}>
           <View style={styles.titleSection}>
             <Text style={styles.title}>{title}</Text>
-            {tableId && <Text style={styles.tableId}>Table {tableId}</Text>}
+            {subtitle && <Text style={styles.subtitle}>{subtitle}</Text>}
           </View>
-          <View style={[styles.statusBadge, { backgroundColor: `${statusColor}20` }]}>
-            <Text style={[styles.statusText, { color: statusColor }]}>
-              {status === 'urgent' ? 'Urgent' : status === 'pending' ? 'En attente' : 'Complété'}
-            </Text>
+          <View style={[styles.statusBadge, { backgroundColor: `${color}15` }]}>
+            <Text style={[styles.statusText, { color }]}>{label}</Text>
           </View>
         </View>
-
-        {description && <Text style={styles.description}>{description}</Text>}
 
         <View style={styles.footer}>
           {time && (
@@ -70,36 +71,37 @@ const styles = StyleSheet.create({
   titleSection: {
     flex: 1,
   },
+  card: {
+    marginBottom: 4,
+    borderColor: BrandColors.borderLight,
+    backgroundColor: BrandColors.card,
+  },
   title: {
-    fontSize: 16,
+    fontSize: 15,
     fontFamily: FONTS.bold,
     color: BrandColors.textPrimary,
-    marginBottom: 4,
+    marginBottom: 2,
   },
-  tableId: {
+  subtitle: {
     fontSize: 13,
-    fontFamily: FONTS.semiBold,
-    color: BrandColors.primary,
+    fontFamily: FONTS.medium,
+    color: BrandColors.textSecondary,
   },
   statusBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
     borderRadius: RADIUS.md,
   },
   statusText: {
     fontSize: 11,
-    fontFamily: FONTS.semiBold,
-  },
-  description: {
-    fontSize: 13,
-    fontFamily: FONTS.regular,
-    color: BrandColors.textSecondary,
-    marginBottom: 12,
+    fontFamily: FONTS.bold,
+    textTransform: 'uppercase',
   },
   footer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    marginTop: 10,
   },
   timeRow: {
     flexDirection: 'row',
@@ -107,8 +109,8 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   timeText: {
-    fontSize: 12,
-    fontFamily: FONTS.regular,
-    color: BrandColors.textSecondary,
+    fontSize: 11,
+    fontFamily: FONTS.medium,
+    color: BrandColors.textMuted,
   },
 })

@@ -187,21 +187,42 @@ export default function EnregistrementsScreen() {
           {loading && products.length === 0 ? (
             <ActivityIndicator color={BrandColors.primary} style={{ marginTop: 40 }} />
           ) : (
-            <FlatList
-              data={filteredProducts}
-              numColumns={2}
-              keyExtractor={item => item.id.toString()}
-              columnWrapperStyle={{ gap: 10 }}
-              renderItem={({ item }) => (
-                <TouchableOpacity style={styles.productCard} onPress={() => addToCart(item)}>
-                  <View style={styles.productIcon}>
-                    <Text style={{ fontSize: 24 }}>🥘</Text>
-                  </View>
-                  <Text style={styles.productName} numberOfLines={1}>{item.name}</Text>
-                  <Text style={styles.productPrice}>{item.price.toLocaleString()} F</Text>
-                </TouchableOpacity>
+            <>
+              {!selectedTable && (
+                <View style={styles.hintBox}>
+                  <Text style={styles.hintText}>Sélectionnez une table à gauche pour commander</Text>
+                </View>
               )}
-            />
+              <FlatList
+                data={filteredProducts}
+                numColumns={2}
+                keyExtractor={item => item.id.toString()}
+                columnWrapperStyle={{ gap: 10 }}
+                renderItem={({ item }) => (
+                  <TouchableOpacity 
+                    style={[styles.productCard, !selectedTable && { opacity: 0.5 }]} 
+                    onPress={() => {
+                      if (!selectedTable) {
+                        setFeedback({
+                          visible: true,
+                          type: 'info',
+                          title: 'Table Requise',
+                          message: 'Veuillez d\'abord sélectionner une table dans la barre latérale gauche.'
+                        })
+                        return
+                      }
+                      addToCart(item)
+                    }}
+                  >
+                    <View style={styles.productIcon}>
+                      <Text style={{ fontSize: 24 }}>🥘</Text>
+                    </View>
+                    <Text style={styles.productName} numberOfLines={1}>{item.name}</Text>
+                    <Text style={styles.productPrice}>{item.price.toLocaleString()} F</Text>
+                  </TouchableOpacity>
+                )}
+              />
+            </>
           )}
         </View>
       </View>
@@ -256,8 +277,8 @@ export default function EnregistrementsScreen() {
                   variant="primary"
                   label="ENVOYER EN CUISINE"
                   onPress={dispatchOrder}
-                  style={{ flex: 1, height: 72, marginBottom: 30 }}
-                  icon={<Send size={28} color="white" />}
+                  style={{ width: '100%', height: 60, marginBottom: 20 }}
+                  icon={<Send size={24} color="white" />}
                 />
               </View>
             </View>
@@ -281,7 +302,7 @@ const styles = StyleSheet.create({
   layout: { flex: 1, flexDirection: 'row' },
   tableSidebar: {
     width: 70,
-    backgroundColor: BrandColors.card,
+    backgroundColor: '#F1F5F9', // Distinct light blue-gray sidebar
     borderRightWidth: 1,
     borderRightColor: BrandColors.borderLight,
     paddingVertical: 12,
@@ -290,7 +311,7 @@ const styles = StyleSheet.create({
   sidebarLabel: {
     fontSize: 9,
     fontFamily: FONTS.bold,
-    color: BrandColors.textMuted,
+    color: '#64748B',
     marginBottom: 12,
   },
   tableBtn: {
@@ -315,6 +336,20 @@ const styles = StyleSheet.create({
   },
   tableBtnTextActive: {
     color: 'white',
+  },
+  hintBox: {
+    backgroundColor: 'rgba(99, 102, 241, 0.08)',
+    padding: 12,
+    borderRadius: RADIUS.md,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(99, 102, 241, 0.2)',
+  },
+  hintText: {
+    color: BrandColors.primary,
+    fontFamily: FONTS.semiBold,
+    fontSize: 13,
+    textAlign: 'center',
   },
   mainContent: { flex: 1, padding: 12 },
   searchBar: {

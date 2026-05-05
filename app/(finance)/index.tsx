@@ -1,38 +1,74 @@
-import { ScrollView, View, StyleSheet, Text, FlatList } from 'react-native'
+import { useState, useEffect } from 'react'
+import { ScrollView, View, StyleSheet, Text, FlatList, ActivityIndicator } from 'react-native'
 import { TrendingUp, BarChart3, ShoppingBag, Truck, Filter } from 'lucide-react-native'
-import { BrandColors, FONTS, RADIUS } from '../constants/theme'
-import { ScreenHeader } from '../components/ScreenHeader'
-import { StatCard } from '../components/StatCard'
-import { Card } from '../components/Card'
-
-const revenueChannels = [
-  { icon: ShoppingBag, label: 'En salle', value: '320K F', percentage: 45 },
-  { icon: Truck, label: 'Livraison', value: '185K F', percentage: 25 },
-  { icon: BarChart3, label: 'Commande en ligne', value: '225K F', percentage: 30 },
-]
-
-const recentSales = [
-  { id: '5542', type: 'Salle', amount: '12,500 F', time: '14:32' },
-  { id: '5543', type: 'Web', amount: '18,000 F', time: '15:10' },
-  { id: '5544', type: 'Salle', amount: '25,500 F', time: '15:45' },
-  { id: '5545', type: 'App', amount: '8,000 F', time: '16:05' }
-]
+import { BrandColors, FONTS, RADIUS } from '../../constants/theme'
+import { ScreenHeader } from '../../components/ScreenHeader'
+import { StatCard } from '../../components/StatCard'
+import { Card } from '../../components/Card'
+import { supabase } from '../../lib/supabase'
 
 export default function RevenuesScreen() {
+  const [loading, setLoading] = useState(true)
+  const [revenues, setRevenues] = useState<any[]>([])
+  const [stats, setStats] = useState({ total: 0, byChannel: { salle: 0, livraison: 0, web: 0 } })
+
+  useEffect(() => {
+    fetchRevenues()
+  }, [])
+
+  async function fetchRevenues() {
+    const { data } = await supabase
+      .from('resto-orders')
+      .select('*')
+      .eq('status', 'paye')
+      .order('created_at', { ascending: false })
+
+    if (data) {
+      setRevenues(data)
+      const total = data.reduce((acc, o) => acc + (o.total || 0), 0)
+      const salle = data.filter(o => o.type === 'salle').reduce((acc, o) => acc + (o.total || 0), 0)
+      const livraison = data.filter(o => o.type === 'external').reduce((acc, o) => acc + (o.total || 0), 0)
+      
+      setStats({
+        total,
+        byChannel: {
+          salle,
+          livraison,
+          web: 0 // For now
+        }
+      })
+    }
+    setLoading(false)
+  }
+
+  const revenueChannels = [
+    { icon: ShoppingBag, label: 'En salle', value: `${stats.byChannel.salle.toLocaleString()} F`, percentage: stats.total > 0 ? Math.round((stats.byChannel.salle / stats.total) * 100) : 0 },
+    { icon: Truck, label: 'Livraison', value: `${stats.byChannel.livraison.toLocaleString()} F`, percentage: stats.total > 0 ? Math.round((stats.byChannel.livraison / stats.total) * 100) : 0 },
+  ]
+
+  if (loading) {
+    return (
+      <View style={[styles.container, styles.center]}>
+        <ActivityIndicator color={BrandColors.primary} />
+      </View>
+    )
+  }
+
   return (
     <View style={styles.container}>
       <ScreenHeader
         title="Encaissements"
         subtitle="Détail des revenus par canal"
+        showBack={false}
       />
 
       <ScrollView showsVerticalScrollIndicator={false} style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
         <View style={styles.statsGrid}>
           <StatCard
             icon={<TrendingUp size={24} color={BrandColors.primary} />}
-            label="Revenu Total Jour"
-            value="730K F"
-            trend={{ value: 15, isPositive: true }}
+            label="Revenu Total"
+            value={`${stats.total.toLocaleString()} F`}
+            trend={{ value: 0, isPositive: true }}
           />
         </View>
 
@@ -75,39 +111,22 @@ export default function RevenuesScreen() {
             <Filter size={18} color={BrandColors.textSecondary} />
           </View>
           <View style={styles.salesList}>
-            {recentSales.map((sale, i) => (
+            {revenues.slice(0, 10).map((sale, i) => (
               <Card key={i} variant="default" padding={12} style={styles.saleCard}>
                 <View style={styles.saleContent}>
                   <View style={styles.saleIconContainer}>
                     <BarChart3 size={18} color={BrandColors.success} />
                   </View>
                   <View style={styles.saleInfo}>
-                    <Text style={styles.saleTitle}>Commande #{sale.id}</Text>
-                    <Text style={styles.saleSub}>{sale.type} • {sale.time}</Text>
+                    <Text style={styles.saleTitle}>Commande #{sale.id.toString().slice(-4)}</Text>
+                    <Text style={styles.saleSub}>{sale.type === 'salle' ? `Table ${sale.tablenumber}` : 'Livraison'} • {new Date(sale.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</Text>
                   </View>
-                  <Text style={styles.saleAmount}>{sale.amount}</Text>
+                  <Text style={styles.saleAmount}>{sale.total?.toLocaleString()} F</Text>
                 </View>
               </Card>
             ))}
+            {revenues.length === 0 && <Text style={styles.emptyText}>Aucun encaissement</Text>}
           </View>
-        </View>
-
-        {/* Hourly Breakdown */}
-        <View style={styles.sectionContainer}>
-          <Text style={styles.sectionTitle}>Revenus par Heure</Text>
-          <Card variant="elevated" padding={16}>
-            <View style={styles.hourlyList}>
-              {['9h-11h', '11h-13h', '13h-15h', '15h-17h', '17h-19h', '19h-21h'].map((time, i) => (
-                <View key={i} style={styles.hourlyItem}>
-                  <Text style={styles.hourlyTime}>{time}</Text>
-                  <View style={styles.hourlyBar}>
-                    <View style={[styles.hourlyFill, { width: `${(i + 1) * 15}%` }]} />
-                  </View>
-                  <Text style={styles.hourlyAmount}>{50 + i * 20}K F</Text>
-                </View>
-              ))}
-            </View>
-          </Card>
         </View>
       </ScrollView>
     </View>
@@ -118,6 +137,10 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: BrandColors.bg,
+  },
+  center: {
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   scrollView: {
     flex: 1,
@@ -158,7 +181,7 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: RADIUS.lg,
-    backgroundColor: 'rgba(168, 85, 247, 0.1)',
+    backgroundColor: 'rgba(99, 102, 241, 0.1)',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -183,7 +206,7 @@ const styles = StyleSheet.create({
   },
   progressBar: {
     height: 6,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    backgroundColor: 'rgba(0, 0, 0, 0.05)',
     borderRadius: RADIUS.full,
     overflow: 'hidden',
   },
@@ -196,7 +219,7 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   saleCard: {
-    borderColor: 'rgba(255, 255, 255, 0.03)',
+    borderColor: 'rgba(0, 0, 0, 0.03)',
   },
   saleContent: {
     flexDirection: 'row',
@@ -229,31 +252,10 @@ const styles = StyleSheet.create({
     fontFamily: FONTS.bold,
     color: BrandColors.textPrimary,
   },
-  hourlyList: {
-    gap: 12,
-  },
-  hourlyItem: {
-    gap: 8,
-  },
-  hourlyTime: {
-    fontSize: 12,
-    fontFamily: FONTS.semiBold,
-    color: BrandColors.textSecondary,
-  },
-  hourlyBar: {
-    height: 24,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    borderRadius: RADIUS.md,
-    overflow: 'hidden',
-  },
-  hourlyFill: {
-    height: '100%',
-    backgroundColor: BrandColors.primary,
-    borderRadius: RADIUS.md,
-  },
-  hourlyAmount: {
-    fontSize: 12,
-    fontFamily: FONTS.bold,
-    color: BrandColors.textPrimary,
-  },
+  emptyText: {
+    textAlign: 'center',
+    color: BrandColors.textMuted,
+    fontFamily: FONTS.medium,
+    marginTop: 20,
+  }
 })

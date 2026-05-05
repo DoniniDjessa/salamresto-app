@@ -34,7 +34,7 @@ export function Button({
       {...props}
     >
       {icon && icon}
-      <Text style={[styles.text, sizeStyles.text, variantStyles.text]}>
+      <Text style={[styles.text, sizeStyles.text, variantStyles?.text]}>
         {label}
       </Text>
     </TouchableOpacity>
@@ -52,11 +52,16 @@ function getSizeStyle(size: 'sm' | 'md' | 'lg'): any {
   }
 }
 
-function getVariantStyle(variant: 'primary' | 'secondary' | 'danger' | 'ghost'): any {
+function getVariantStyle(variant: 'primary' | 'secondary' | 'danger' | 'ghost' | 'success'): any {
   switch (variant) {
     case 'primary':
       return {
         backgroundColor: BrandColors.primary,
+        text: { color: '#FFFFFF', fontFamily: FONTS.bold },
+      }
+    case 'success':
+      return {
+        backgroundColor: BrandColors.success,
         text: { color: '#FFFFFF', fontFamily: FONTS.bold },
       }
     case 'secondary':

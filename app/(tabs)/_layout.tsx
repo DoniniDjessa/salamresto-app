@@ -82,7 +82,10 @@ export default function TabLayout() {
       tabBar={(props) => <CustomTabBar {...props} />}
       screenOptions={{
         headerShown: false,
-        contentStyle: { backgroundColor: BrandColors.bg }
+        contentStyle: { 
+          backgroundColor: BrandColors.bg,
+          paddingBottom: 85 // Account for the floating tab bar
+        }
       }}
     >
       <Tabs.Screen 

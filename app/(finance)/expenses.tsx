@@ -1,22 +1,44 @@
-import { ScrollView, View, StyleSheet, Text, TouchableOpacity } from 'react-native'
+import { useState, useEffect } from 'react'
+import { ScrollView, View, StyleSheet, Text, TouchableOpacity, ActivityIndicator } from 'react-native'
 import { ShoppingCart, Calendar, Plus, Trash2 } from 'lucide-react-native'
-import { BrandColors, FONTS, RADIUS } from '../constants/theme'
-import { ScreenHeader } from '../components/ScreenHeader'
-import { Card } from '../components/Card'
-import { Button } from '../components/Button'
-
-const recentExpenses = [
-  { id: 1, title: 'Marché - Légumes', amount: '25,000 F', date: "Aujourd'hui", category: 'Cuisine' },
-  { id: 2, title: 'Facture CIE', amount: '145,000 F', date: 'Hier', category: 'Charges' },
-  { id: 3, title: 'Maintenance Gaz', amount: '12,000 F', date: '01 Mai', category: 'Maintenance' },
-]
+import { BrandColors, FONTS, RADIUS } from '../../constants/theme'
+import { ScreenHeader } from '../../components/ScreenHeader'
+import { Card } from '../../components/Card'
+import { Button } from '../../components/Button'
+import { supabase } from '../../lib/supabase'
 
 export default function ExpensesScreen() {
+  const [loading, setLoading] = useState(true)
+  const [expenses, setExpenses] = useState<any[]>([])
+
+  useEffect(() => {
+    fetchExpenses()
+  }, [])
+
+  async function fetchExpenses() {
+    const { data } = await supabase
+      .from('resto-expenses')
+      .select('*')
+      .order('created_at', { ascending: false })
+
+    if (data) setExpenses(data)
+    setLoading(false)
+  }
+
+  if (loading) {
+    return (
+      <View style={[styles.container, styles.center]}>
+        <ActivityIndicator color={BrandColors.primary} />
+      </View>
+    )
+  }
+
   return (
     <View style={styles.container}>
       <ScreenHeader
         title="Dépenses & Achats"
         subtitle="Suivez vos sorties de caisse"
+        showBack={false}
       />
 
       <ScrollView showsVerticalScrollIndicator={false} style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
@@ -37,7 +59,7 @@ export default function ExpensesScreen() {
           </View>
 
           <View style={styles.expenseList}>
-            {recentExpenses.map((expense) => (
+            {expenses.map((expense) => (
               <Card key={expense.id} variant="elevated" padding={16} style={styles.expenseCard}>
                 <View style={styles.expenseHeader}>
                   <View style={styles.iconContainer}>
@@ -46,12 +68,12 @@ export default function ExpensesScreen() {
                   <View style={styles.expenseInfo}>
                     <Text style={styles.expenseTitle}>{expense.title}</Text>
                     <View style={styles.metaRow}>
-                      <Text style={styles.expenseDate}>{expense.date}</Text>
+                      <Text style={styles.expenseDate}>{new Date(expense.created_at).toLocaleDateString()}</Text>
                       <View style={styles.dot} />
                       <Text style={styles.expenseCategory}>{expense.category}</Text>
                     </View>
                   </View>
-                  <Text style={styles.expenseAmount}>-{expense.amount}</Text>
+                  <Text style={styles.expenseAmount}>-{expense.amount?.toLocaleString()} F</Text>
                 </View>
 
                 <View style={styles.expenseActions}>
@@ -61,6 +83,7 @@ export default function ExpensesScreen() {
                 </View>
               </Card>
             ))}
+            {expenses.length === 0 && <Text style={styles.emptyText}>Aucune dépense enregistrée</Text>}
           </View>
         </View>
       </ScrollView>
@@ -72,6 +95,10 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: BrandColors.bg,
+  },
+  center: {
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   scrollView: {
     flex: 1,
@@ -162,5 +189,11 @@ const styles = StyleSheet.create({
   },
   deleteButton: {
     padding: 4,
+  },
+  emptyText: {
+    textAlign: 'center',
+    color: BrandColors.textMuted,
+    fontFamily: FONTS.medium,
+    marginTop: 20,
   }
 })
